@@ -1,3 +1,8 @@
+
+# you should keep that in mind when you create your own api, it requires your public API which changes 
+# under some conditions, if it changes you'll get Authentication Error. 
+
+
 import time
 import hmac
 import base64
@@ -9,42 +14,63 @@ import btcturk_api.exceptions
 import btcturk_api.properties
 from btcturk_api.client import Client
 
+# Settings
 btc_amount = 2500
 eth_amount = 1875
 atom_amount = 625
-desired_currency = "TRY"  # you can choose your desired currency "USD" or "TRY"
-secretfile = "secret.txt"
+desired_currency = "TRY"  # you can choose your desired currency with their short version like "USD" or "TRY".
+secretfile = "secret.txt" # the file should contain api keys
 
-
+# reads api keys from folder
 with open(secretfile) as f:
     contents = f.read()
     apiKey = contents.split("\n")[0]  # the api key that you took from btcturk API goes to first line of the secret.txt file
     apiSecret = contents.split("\n")[1].strip()  # the api secret goes to second line of the secret.txt file
 
+# calls btcturk_api and implement with api keys
 my_client = Client(api_key=apiKey, api_secret=apiSecret)
 time = my_client.get_server_time()
 balance = my_client.get_account_balance()
-newbalance = []
-mycurrency = []
+my_wallet = []
+my_currency = []
 
+# gets 
 for item in balance:
     if float(item["balance"]) > 0:
-        newbalance.append(item)
-        mycurrency.append(item["asset"])
-# print(mycurrency)
+        my_wallet.append(item)
+        my_currency.append(item["asset"])
 
-for item in my_client.tick():
-    for currency in mycurrency:
-        if item["pair"].replace(desired_currency,"") == currency:
-            print(currency, mycurrency["asset"])
 
-            # if currency == mycurrency["asset"]:
-            #     print(mycurrency["asset"])
+btc_price = my_client.tick('BTC_TRY')
+# print(btc_price)
+# print(my_wallet)
+for item in my_currency:
+    for item_value in my_client.tick(f"{item}_{desired_currency}"):
+        print(item_value)
+
+
+
+    # for currency in my_currency:
+    #     if item["pair"].replace(desired_currency,"") == currency:
+    #         print(currency, my_currency)
+
+
+
+
+
+
+
+
+
+
+
+            # if currency == my_currency["asset"]:
+            #     print(my_currency["asset"])
 
 
             
-    # if item["pair"] + desired_currency in mycurrency:
-    # if item["pair"].replace(desired_currency,"") in mycurrency:
+    # if item["pair"] + desired_currency in my_currency:
+    # if item["pair"].replace(desired_currency,"") in my_currency:
     #     print(item)
 
 
